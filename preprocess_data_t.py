@@ -166,6 +166,24 @@ def _process_utterance(mel_dir, linear_dir, wav_dir, index, wav_path, text, hpar
     # Return a tuple describing this training example
     return (audio_filename, mel_filename, linear_filename, time_steps, mel_frames, text)
 
+
+
+
+def write_metadata(metadata, out_dir):
+	with open(os.path.join(out_dir, 'train.txt'), 'w', encoding='utf-8') as f:
+		for m in metadata:
+			f.write('|'.join([str(x) for x in m]) + '\n')
+	mel_frames = sum([int(m[4]) for m in metadata])
+	timesteps = sum([int(m[3]) for m in metadata])
+	sr = hparams_1.sample_rate
+	hours = timesteps / sr / 3600
+	print('Write {} utterances, {} mel frames, {} audio timesteps, ({:.2f} hours)'.format(
+		len(metadata), mel_frames, timesteps, hours))
+	print('Max input length (text chars): {}'.format(max(len(m[5]) for m in metadata)))
+	print('Max mel frames length: {}'.format(max(int(m[4]) for m in metadata)))
+	print('Max audio timesteps length: {}'.format(max(m[3] for m in metadata)))
+
+
 hparams_1=HParams()
 print(hparams_1.sample_rate)
 input_dirs=['./Dataset/']
@@ -183,7 +201,7 @@ directories = [mel_dir, linear_dir, wav_dir]
 for directory in directories:
     if not os.path.exists(directory):
         os.makedirs(directory)
-        print(f"Created directory: {directory}")
     else:
         print(f"Directory already exists: {directory}")
-build_from_path(hparams_1, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12, tqdm=lambda x: x)
+meta_data=build_from_path(hparams_1, input_dirs, mel_dir, linear_dir, wav_dir, n_jobs=12, tqdm=lambda x: x)
+write_metadata(meta_data,'./training_dir/')
