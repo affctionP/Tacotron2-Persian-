@@ -53,4 +53,4 @@ mask = np.random.choice([0, 1], size=(batch_size, 1, seq_len, seq_len))
 output, weights = attention(query, key, value, mask)
 
 print("Attention Output:\n", output.shape)
-print("\nAttention Weights:\n", weights)
+print("\nAttention Weights:\n", weights.shape)
